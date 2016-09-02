@@ -7,7 +7,7 @@ class QueueOfStacks(object):
     """A Queue using only Stacks as its underlying data stucture."""
 
     def __init__(self):
-
+        """Initialize the Queue with two stacks holding data."""
         self._stack = Stack()
         self._reverse_stack = Stack()
         self._reverse = False
@@ -28,6 +28,13 @@ class QueueOfStacks(object):
 
     def peek(self):
         """Return the front item in the Queue without removing it."""
+        if self._reverse:
+            item = self._reverse_stack.pop()
+            self._reverse_stack.push(item)
+        else:
+            item = self._stack.pop()
+            self._stack.push(item)
+        return item
 
     def size(self):
         """Return the length of the Queue."""
