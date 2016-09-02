@@ -19,3 +19,7 @@ class Stack(object):
             raise IndexError("Cannot pop from an empty stack.")
         else:
             return self._stack.pop()
+
+    def size(self):
+        """Return the length of the stack."""
+        return self._stack.size()

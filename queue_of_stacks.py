@@ -8,8 +8,8 @@ class QueueOfStacks(object):
 
     def __init__(self):
 
-        self._stack = []
-        self._reverse_stack = []
+        self._stack = Stack()
+        self._reverse_stack = Stack()
         self._reverse = False
 
     def enqueue(self, val):
@@ -17,7 +17,7 @@ class QueueOfStacks(object):
         if not self._reverse:
             self._transfer(self._stack, self._reverse_stack)
             self._reverse = True
-        self._reverse_stack.append(val)
+        self._reverse_stack.push(val)
 
     def dequeue(self):
         """Remove the front item in the Queue and return it."""
@@ -28,26 +28,17 @@ class QueueOfStacks(object):
 
     def peek(self):
         """Return the front item in the Queue without removing it."""
-        if self._reverse:
-            self._transfer(self._reverse_stack, self._stack)
-            self._reverse = False
-        try:
-            return self._stack[-1]
-        except IndexError:
-            return None
-    
+
     def size(self):
         """Return the length of the Queue."""
-        try:
-            return len(self._stack)
-        except IndexError:
-            return None
+        if self._reverse:
+            return self._reverse_stack.size()
+        return self._stack.size()
 
     def _transfer(self, from_stack, to_stack):
         """Transfer all items from the from_stack to the to_stack."""
         while True:
             try:
-                item = from_stack.pop()
-                to_stack.append(item)
+                to_stack.push(from_stack.pop())
             except IndexError:
                 break
