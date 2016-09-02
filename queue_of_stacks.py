@@ -17,7 +17,6 @@ class QueueOfStacks(object):
         """Add an item to the Queue."""
         if not self._reverse:
             self._transfer(self._stack, self._reverse_stack)
-            self._reverse = True
         self._reverse_stack.push(val)
         self._size += 1
 
@@ -25,7 +24,6 @@ class QueueOfStacks(object):
         """Remove the front item in the Queue and return it."""
         if self._reverse:
             self._transfer(self._reverse_stack, self._stack)
-            self._reverse = False
         try:
             item = self._stack.pop()
             self._size -= 1
@@ -55,3 +53,4 @@ class QueueOfStacks(object):
                 to_stack.push(from_stack.pop())
             except IndexError:
                 break
+        self._reverse = not self._reverse
