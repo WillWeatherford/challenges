@@ -1,4 +1,21 @@
-"""Implementation of a Queue using only stacks."""
+"""Implementation of a Queue using only stacks.
+
+Credit to Crystal Stellwagen for the idea of optimizing for repeated
+enqueue or repeated dequeue operations, and for help in implementation.
+
+Utilizes two stacks:
+A "normal" stack where the top item is the front, i.e. the item to
+be dequeued.
+A "reversed" stack where the top is the "back" i.e. where items go when
+enqueued.
+
+The flag attribute "_reverse" keeps track of which stack is active. When the 
+operation alternates between enqueue and dequeue, the "_transfer" method will
+flip all items from one stack to the other, and flip the "_reverse" boolean.
+
+Best case is O(1) on repeated dequeue or repeated enqueue operations.
+Worst case is O(n) on alternated enqueue and dequeue operations.
+"""
 
 from data_structures.stack import Stack
 
