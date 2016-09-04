@@ -18,11 +18,19 @@ Input: an array of integers or floats.
 Output: a 3-tuple of (buy_date, sell_date, profit), where buy_date and
 sell_date are indexes of the input array.
 """
+from __future__ import unicode_literals, division
+from operator import itemgetter
 
 
 def calc_profit(array):
     """Return tuple of buy date, sell date and profit from given list of ints.
 
-    Where profit is the difference between the values at sell date and buy
+    Buy date and sell date are indexes from the input list.
+    Profit is the difference between the values at sell date and buy
     date, being the maximum difference possible from the given list.
     """
+    enum = list(enumerate(array))
+    buy_idx, buy_val = min(enum, key=itemgetter(1))
+    sell_idx, sell_val = max(enum, key=itemgetter(1))
+
+    return buy_idx, sell_idx, sell_val - buy_val
