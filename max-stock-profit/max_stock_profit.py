@@ -33,4 +33,7 @@ def calc_profit(array):
     buy_idx, buy_val = min(enum, key=itemgetter(1))
     sell_idx, sell_val = max(enum, key=itemgetter(1))
 
+    if not sell_idx > buy_idx:
+        return 0, 0, 0
+
     return buy_idx, sell_idx, sell_val - buy_val
