@@ -33,22 +33,24 @@ def calc_profit(array):
     lowest_idx, lowest_num = 0, array[0]
 
     # Iterate over everything but first value since we already have it.
-    for idx in range(1, len(array)):
-        num = array[idx]
+    for idx, num in enumerate(array):
 
         # Update overall minimum value so far if necessary.
         if num < lowest_num:
             lowest_idx, lowest_num = idx, num
-        else:
-            # Checking profit with current num agaist lowest number overall.
-            current_result = lowest_idx, idx, num - lowest_num
-            best_result = max(best_result, current_result, key=itemgetter(2))
+            # If we have seen the lowest number, there's no chance we can find
+            # best profit result at current number, so continue.
+            continue
+
+        # Checking profit with current num agaist lowest number overall.
+        current_result = (lowest_idx, idx, num - lowest_num)
+        best_result = max(best_result, current_result, key=itemgetter(2))
 
     return best_result
 
 
 def calc_profit_nsquared(array):
-    """O(n ** 2) version of calc_profit."""
+    """O(n ** 2) version of calc_profit for performance comparison."""
     best = (0, 0, 0)
     for idx1, num1 in enumerate(array):
         for idx2, num2 in enumerate(array[idx1 + 1:]):
