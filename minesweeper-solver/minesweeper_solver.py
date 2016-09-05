@@ -79,3 +79,13 @@ execute the clicks.
 #   2 touching 2 flag = all other adjacent are safe
 #   etc
 #   n touching n flags = all other adjacent are safe
+
+
+# for y, x, cell in cool_iterator:
+#   neighbors = get_neighbors(y, x)
+#   if neighbors.count("?") <= cell: (catch TypeError)
+#       flag cell neighbors
+#   if neighbors.count("F") == cell:
+#       mark all others as safe
+#   if neighbors.count("F") > cell:
+#       assert False (something fucked up)
