@@ -34,15 +34,16 @@ def calc_profit(array):
 
     for idx in range(1, len(array)):
         num = array[idx]
+        pair = (idx, num)
 
         if num < overall_min[1]:
-            overall_min = (idx, num)
+            overall_min = pair
 
         if num < array[idx - 1]:
-            current_min = (idx, num)
+            current_min = pair
         else:
-            current_result = _compare(current_min, (idx, num))
-            macro_result = _compare(overall_min, (idx, num))
+            current_result = _compare(current_min, pair)
+            macro_result = _compare(overall_min, pair)
             best_result = max(
                 (best_result, current_result, macro_result),
                 key=itemgetter(2)
