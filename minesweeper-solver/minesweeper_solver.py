@@ -14,15 +14,17 @@ Hidden/unknown fields are denoted with a '?'.
 
 Example for a 9x9 board:
 
-    1????
-    1????
-    111??
-      1??
-1211  1??
-???21 1??
-????211??
-?????????
-?????????
+  012345678
+ ----------
+0|    1????
+1|    1????
+2|    111??
+3|      1??
+4|1211  1??
+5|???21 1??
+6|????211??
+7|?????????
+8|?????????
 
 Output description
 
@@ -51,17 +53,29 @@ As suggested by /u/wutaki, this input is a greater challenge then the original:
 ?2222?
 ?1  1?
 
-Notes/Hints
-
-If you have no idea where to start I suggest you play the game for a while and
-try to formalize your strategy.
-
 Minesweeper is a game of both logic and luck. Sometimes it is impossible to
 find free fields through logic. The right output would then be an empty list.
 Your algorithm does not need to guess.
+
 Bonus
 
 Extra hard mode: Make a closed-loop bot. It should take a screenshot, parse the
 board state from the pixels, run the algorithm and manipulate the cursor to
 execute the clicks.
 """
+
+# Iterate across whole board -- any way to speed up?
+# Should be able to modify in place and continue working, without modifying
+# length of list.
+#
+# Check numbered square for obvious flag:
+#   1 touching only 1 ? == flag
+#   2 touching only 2 ? == flag
+#   etc
+#   n touching only n ? == flag
+
+# Flagged
+#   1 touching 1 flag = all other adjacent are safe
+#   2 touching 2 flag = all other adjacent are safe
+#   etc
+#   n touching n flags = all other adjacent are safe
