@@ -63,6 +63,8 @@ Extra hard mode: Make a closed-loop bot. It should take a screenshot, parse the
 board state from the pixels, run the algorithm and manipulate the cursor to
 execute the clicks.
 """
+from __future__ import unicode_literals, division
+from itertools import cycle
 
 # Iterate across whole board -- any way to speed up?
 # Should be able to modify in place and continue working, without modifying
@@ -95,7 +97,16 @@ def sweep(grid):
     """Return a set of safe coordinates in the given grid."""
     grid = _listify(grid)
     for y, x, cell in _iter_grid(grid):
-        pass
+        unsolved_neighbors = filter(lambda x: x == '?', _get_neighbors(y, x, grid)
+        if len(unsolved_neighbors) <= cell:
+            for y, x in unsolved_neighbors:
+                grid[y][x] = 'F'
+
+
+
+def _listify(grid):
+    """Convert a string grid into a list of lists."""
+    return [list(map(_get_cell, row)) for row in grid.split()]
 
 
 def _get_cell(char):
@@ -106,14 +117,26 @@ def _get_cell(char):
         return char
 
 
-def _listify(grid):
-    """Convert a string grid into a list of lists."""
-    return [list(map(_get_cell, row)) for row in grid.split()]
-
-
 def _iter_grid(grid):
-    """Repeatedly iterate over all coordinates in the grid."""
+    """Generate all coordinates in the grid."""
     for y, row in enumerate(grid):
         for x, cell in enumerate(row):
             yield y, x, cell
 
+
+def _unsolved_neighbors(y, x, grid):
+    """Generate only those neighbors where the cell is uncovered."""
+    for n_y, n_x, nei in _get_neighbors(y, x, grid):
+        if nei == '?':
+            yield n_y, n_x
+
+
+def _get_neighbors(y, x, grid):
+    """Generate all neighbors around the given coordinates."""
+    for n_y in range(max(0, y - 1), y + 2):
+        for n_x in range(max(0, x - 1), x + 2):
+            if not (y, x) == (n_y, n_x):
+                try:
+                    yield n_y, n_x, grid[n_y][n_y]
+                except IndexError:
+                    pass
