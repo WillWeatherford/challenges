@@ -29,6 +29,12 @@ CASES = [
 ]
 
 
+def test_listify():
+    """Test that _listify makes multiline comment into lists."""
+    from minesweeper_solver import _listify
+    assert _listify(GRID1) == [[1, 1], [1, '?']]
+
+
 @pytest.mark.parametrize('input_, output', CASES)
 def test_grid(input_, output):
     """Test that minesweeper_solver delivers the expected output."""

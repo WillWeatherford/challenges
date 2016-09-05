@@ -89,3 +89,31 @@ execute the clicks.
 #       mark all others as safe
 #   if neighbors.count("F") > cell:
 #       assert False (something fucked up)
+
+
+def sweep(grid):
+    """Return a set of safe coordinates in the given grid."""
+    grid = _listify(grid)
+    for y, x, cell in _iter_grid(grid):
+        pass
+
+
+def _get_cell(char):
+    """Get the right char/type for the given cell."""
+    try:
+        return int(char)
+    except ValueError:
+        return char
+
+
+def _listify(grid):
+    """Convert a string grid into a list of lists."""
+    return [list(map(_get_cell, row)) for row in grid.split()]
+
+
+def _iter_grid(grid):
+    """Repeatedly iterate over all coordinates in the grid."""
+    for y, row in enumerate(grid):
+        for x, cell in enumerate(row):
+            yield y, x, cell
+
