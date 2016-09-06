@@ -108,7 +108,8 @@ def sweep(grid):
         if len(unsolved_neighbors) <= cell:
             for y, x in unsolved_neighbors:
                 grid[y][x] = 'F'
-    print(grid)
+    for row in grid:
+        print(row)
     return safe
 
 
