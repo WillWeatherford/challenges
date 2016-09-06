@@ -95,13 +95,29 @@ from itertools import cycle
 
 def sweep(grid):
     """Return a set of safe coordinates in the given grid."""
+    safe = set()
     grid = _listify(grid)
-    for y, x, cell in _iter_grid(grid):
-        unsolved_neighbors = filter(lambda x: x == '?', _get_neighbors(y, x, grid)
+    for y, x, cell in _iter_numbered_cells(grid):
+        unsolved_neighbors = list(_unsolved_neighbors(y, x, grid))
+
+        # If there are less or equal unsolved neighbors than N, flag them all
         if len(unsolved_neighbors) <= cell:
             for y, x in unsolved_neighbors:
                 grid[y][x] = 'F'
 
+        flagged_neighbors = list(_flagged_neighbors(y, x, grid))
+
+        # When the number of flagged numbers equals the current number,
+        # the rest of unsolved neighbors are all safe.
+        import pdb;pdb.set_trace()
+        if len(flagged_neighbors) == cell:
+            for y, x in _unsolved_neighbors(y, x, grid):
+                grid[y][x] = 'S'
+                safe.add((y, x))
+        elif len(flagged_neighbors) > cell:
+            raise ValueError('More than {} flagged neighbors at {}, {}.'
+                             ''.format(cell, y, x))
+    return safe
 
 
 def _listify(grid):
@@ -117,17 +133,25 @@ def _get_cell(char):
         return char
 
 
-def _iter_grid(grid):
+def _iter_numbered_cells(grid):
     """Generate all coordinates in the grid."""
     for y, row in enumerate(grid):
         for x, cell in enumerate(row):
-            yield y, x, cell
+            if isinstance(cell, int):
+                yield y, x, cell
 
 
 def _unsolved_neighbors(y, x, grid):
     """Generate only those neighbors where the cell is uncovered."""
     for n_y, n_x, nei in _get_neighbors(y, x, grid):
         if nei == '?':
+            yield n_y, n_x
+
+
+def _flagged_neighbors(y, x, grid):
+    """Generate only those neighbors with a flag."""
+    for n_y, n_x, nei in _get_neighbors(y, x, grid):
+        if nei == 'F':
             yield n_y, n_x
 
 
