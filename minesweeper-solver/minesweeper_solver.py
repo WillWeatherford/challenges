@@ -98,18 +98,11 @@ def sweep(grid):
     safe = set()
     grid = _listify(grid)
     for y, x, cell in _iter_numbered_cells(grid):
-        unsolved_neighbors = list(_unsolved_neighbors(y, x, grid))
-
-        # If there are less or equal unsolved neighbors than N, flag them all
-        if len(unsolved_neighbors) <= cell:
-            for y, x in unsolved_neighbors:
-                grid[y][x] = 'F'
-
         flagged_neighbors = list(_flagged_neighbors(y, x, grid))
 
         # When the number of flagged numbers equals the current number,
         # the rest of unsolved neighbors are all safe.
-        import pdb;pdb.set_trace()
+        # import pdb;pdb.set_trace()
         if len(flagged_neighbors) == cell:
             for y, x in _unsolved_neighbors(y, x, grid):
                 grid[y][x] = 'S'
@@ -117,6 +110,14 @@ def sweep(grid):
         elif len(flagged_neighbors) > cell:
             raise ValueError('More than {} flagged neighbors at {}, {}.'
                              ''.format(cell, y, x))
+
+        unsolved_neighbors = list(_unsolved_neighbors(y, x, grid))
+
+        # If there are less or equal unsolved neighbors than N, flag them all
+        if len(unsolved_neighbors) <= cell:
+            for y, x in unsolved_neighbors:
+                grid[y][x] = 'F'
+        
     return safe
 
 
@@ -161,6 +162,6 @@ def _get_neighbors(y, x, grid):
         for n_x in range(max(0, x - 1), x + 2):
             if not (y, x) == (n_y, n_x):
                 try:
-                    yield n_y, n_x, grid[n_y][n_y]
+                    yield n_y, n_x, grid[n_y][n_x]
                 except IndexError:
                     pass
