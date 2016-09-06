@@ -64,7 +64,7 @@ board state from the pixels, run the algorithm and manipulate the cursor to
 execute the clicks.
 """
 from __future__ import unicode_literals, division
-from itertools import cycle
+from itertools import cycle, chain
 
 # Iterate across whole board -- any way to speed up?
 # Should be able to modify in place and continue working, without modifying
@@ -83,21 +83,11 @@ from itertools import cycle
 #   n touching n flags = all other adjacent are safe
 
 
-# for y, x, cell in cool_iterator:
-#   neighbors = get_neighbors(y, x)
-#   if neighbors.count("?") <= cell: (catch TypeError)
-#       flag cell neighbors
-#   if neighbors.count("F") == cell:
-#       mark all others as safe
-#   if neighbors.count("F") > cell:
-#       assert False (something fucked up)
-
-
 def sweep(grid):
     """Return a set of safe coordinates in the given grid."""
     safe = set()
     grid = _listify(grid)
-    for y, x, cell in _iter_numbered_cells(grid):
+    for y, x, cell in _two_sweeps(grid):
         flagged_neighbors = list(_flagged_neighbors(y, x, grid))
 
         # When the number of flagged numbers equals the current number,
@@ -107,6 +97,7 @@ def sweep(grid):
             for y, x in _unsolved_neighbors(y, x, grid):
                 grid[y][x] = 'S'
                 safe.add((y, x))
+
         elif len(flagged_neighbors) > cell:
             raise ValueError('More than {} flagged neighbors at {}, {}.'
                              ''.format(cell, y, x))
@@ -134,10 +125,19 @@ def _get_cell(char):
         return char
 
 
+def _two_sweeps(grid):
+    """Sweep forward once then backwards once across whole grid."""
+    yield from chain(
+        _iter_numbered_cells(grid),
+        reversed(list(_iter_numbered_cells(grid)))
+    )
+
+
 def _iter_numbered_cells(grid):
     """Generate all coordinates in the grid."""
     for y, row in enumerate(grid):
-        for x, cell in enumerate(row):
+        for x, _ in enumerate(row):
+            cell = grid[y][x]
             if isinstance(cell, int):
                 yield y, x, cell
 
