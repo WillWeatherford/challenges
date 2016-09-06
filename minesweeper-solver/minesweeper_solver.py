@@ -129,7 +129,7 @@ def _two_sweeps(grid):
     """Sweep forward once then backwards once across whole grid."""
     yield from chain(
         _iter_numbered_cells(grid),
-        reversed(list(_iter_numbered_cells(grid)))
+        _iter_numbered_cells(grid)
     )
 
 
