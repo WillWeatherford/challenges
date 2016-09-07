@@ -42,16 +42,19 @@ For the above input example this would be:
 6 2
 6 7
 
-Challenge input
+Challenge Input
 
 As suggested by /u/wutaki, this input is a greater challenge then the original:
 
 ??????
-???2??
-???4??
-?2??2?
+??F2F?
+F??4?F
+S2FF2S
 ?2222?
-?1  1?
+F1  1F
+
+3 0
+3 5
 
 Minesweeper is a game of both logic and luck. Sometimes it is impossible to
 find free fields through logic. The right output would then be an empty list.
