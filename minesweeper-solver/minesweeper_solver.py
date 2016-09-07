@@ -94,34 +94,11 @@ def sweep(grid):
     """Return a set of safe coordinates in the given grid."""
     safe = set()
     grid = _listify(grid)
-    for y, x, cell in _two_sweeps(grid):
-        flagged_neighbors = list(_flagged_neighbors(y, x, grid))
+    numbered_to_evaluate = list(_numbered_cells(_all_cells(grid), grid))
+    flagged_to_evaluate = []
+    while True:
+        pass
 
-        # When the number of flagged numbers equals the current number,
-        # the rest of unsolved neighbors are all safe.
-        # import pdb;pdb.set_trace()
-        if len(flagged_neighbors) == int(cell):
-            for y, x in _unsolved_neighbors(y, x, grid):
-                grid[y][x] = 'S'
-                safe.add((y, x))
-
-        elif len(flagged_neighbors) > int(cell):
-            for row in grid:
-                print(row)
-            # import pdb;pdb.set_trace()
-            raise ValueError('More than {} flagged neighbors at {}, {}.'
-                             ''.format(cell, y, x))
-
-        unsolved_neighbors = list(_unsolved_neighbors(y, x, grid))
-        flagged_neighbors = list(_flagged_neighbors(y, x, grid))
-
-        # If there are less or equal unsolved neighbors AND flagged than N,
-        # flag all the unsolved
-        if len(unsolved_neighbors) + len(flagged_neighbors) <= int(cell):
-            for y, x in unsolved_neighbors:
-                grid[y][x] = 'F'
-    for row in grid:
-        print(row)
     return safe
 
 
@@ -130,37 +107,32 @@ def _listify(grid):
     return [list(row) for row in grid.split('\n') if row]
 
 
-def _two_sweeps(grid):
-    """Sweep forward once then backwards once across whole grid."""
-    yield from chain(
-        _iter_numbered_cells(grid),
-        _iter_numbered_cells(grid),
-        _iter_numbered_cells(grid),
-        _iter_numbered_cells(grid),
-    )
-
-
-def _iter_numbered_cells(grid):
+def _all_cells(grid):
     """Generate all coordinates in the grid."""
     for y, row in enumerate(grid):
         for x, _ in enumerate(row):
-            cell = grid[y][x]
-            if cell.isdigit():
-                yield y, x, cell
+            yield y, x
 
 
-def _unsolved_neighbors(y, x, grid):
+def _numbered_cells(sequence, grid):
+    """Filter only numbered cells of sequence."""
+    for y, x in sequence:
+        if grid[y][x].isdigit():
+            yield y, x
+
+
+def _unsolved_cells(sequence, grid):
     """Generate only those neighbors where the cell is uncovered."""
-    for n_y, n_x, nei in _get_neighbors(y, x, grid):
-        if nei == '?':
-            yield n_y, n_x
+    for y, x in sequence:
+        if grid[y][x] == '?':
+            yield y, x
 
 
-def _flagged_neighbors(y, x, grid):
+def _flagged_cells(y, x, grid):
     """Generate only those neighbors with a flag."""
-    for n_y, n_x, nei in _get_neighbors(y, x, grid):
-        if nei == 'F':
-            yield n_y, n_x
+    for y, x in sequence:
+        if grid[y][x] == 'F':
+            yield y, x
 
 
 def _get_neighbors(y, x, grid):
@@ -169,6 +141,6 @@ def _get_neighbors(y, x, grid):
         for n_x in range(max(0, x - 1), x + 2):
             if not (y, x) == (n_y, n_x):
                 try:
-                    yield n_y, n_x, grid[n_y][n_x]
+                    yield n_y, n_x
                 except IndexError:
                     pass
