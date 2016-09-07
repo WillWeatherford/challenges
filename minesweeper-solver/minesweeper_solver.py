@@ -93,37 +93,38 @@ def sweep(grid):
         # When the number of flagged numbers equals the current number,
         # the rest of unsolved neighbors are all safe.
         # import pdb;pdb.set_trace()
-        if len(flagged_neighbors) == cell:
+        if len(flagged_neighbors) == int(cell):
             for y, x in _unsolved_neighbors(y, x, grid):
                 grid[y][x] = 'S'
                 safe.add((y, x))
 
-        elif len(flagged_neighbors) > cell:
+        elif len(flagged_neighbors) > int(cell):
+            for row in grid:
+                print(row)
+            # import pdb;pdb.set_trace()
             raise ValueError('More than {} flagged neighbors at {}, {}.'
                              ''.format(cell, y, x))
 
         unsolved_neighbors = list(_unsolved_neighbors(y, x, grid))
 
         # If there are less or equal unsolved neighbors than N, flag them all
-        if len(unsolved_neighbors) <= cell:
+        if len(unsolved_neighbors) <= int(cell):
             for y, x in unsolved_neighbors:
                 grid[y][x] = 'F'
-    for row in grid:
-        print(row)
     return safe
 
 
 def _listify(grid):
     """Convert a string grid into a list of lists."""
-    return [list(map(_get_cell, row)) for row in grid.split()]
+    return [list(row) for row in grid.split('\n') if row]
 
 
-def _get_cell(char):
-    """Get the right char/type for the given cell."""
-    try:
-        return int(char)
-    except ValueError:
-        return char
+# def _get_cell(char):
+#     """Get the right char/type for the given cell."""
+#     try:
+#         return int(char)
+#     except ValueError:
+#         return char
 
 
 def _two_sweeps(grid):
@@ -139,7 +140,7 @@ def _iter_numbered_cells(grid):
     for y, row in enumerate(grid):
         for x, _ in enumerate(row):
             cell = grid[y][x]
-            if isinstance(cell, int):
+            if cell.isdigit():
                 yield y, x, cell
 
 

@@ -54,22 +54,31 @@ RESULT5 = {
 }
 
 CASES = [
-    (GRID1, set()),
-    (GRID2, set()),
-    (GRID3, {(1, 2), (2, 1)}),
-    (GRID4, {(1, 0), (0, 1)}),
-    (GRID5, RESULT5),
+    (GRID1, set(), 2), 
+    (GRID2, set(), 3),
+    (GRID3, {(1, 2), (2, 1)}, 3),
+    (GRID4, {(1, 0), (0, 1)}, 3),
+    (GRID5, RESULT5, 9),
 ]
 
 
-def test_listify():
+@pytest.mark.parametrize('input_, output, size', CASES)
+def test_listify_height(input_, output, size):
     """Test that _listify makes multiline comment into lists."""
     from minesweeper_solver import _listify
-    assert _listify(GRID1) == [[1, 1], [1, '?']]
+    assert len(_listify(input_)) == size
 
 
-@pytest.mark.parametrize('input_, output', CASES)
-def test_grid(input_, output):
+@pytest.mark.parametrize('input_, output, size', CASES)
+def test_listify_width(input_, output, size):
+    """Test that _listify makes multiline comment into lists."""
+    from minesweeper_solver import _listify
+    for row in _listify(input_):
+        assert len(row) == size
+
+
+@pytest.mark.parametrize('input_, output, size', CASES)
+def test_grid(input_, output, size):
     """Test that minesweeper_solver delivers the expected output."""
     from minesweeper_solver import sweep
     assert sweep(input_) == output
