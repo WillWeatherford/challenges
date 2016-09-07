@@ -86,8 +86,8 @@ from itertools import cycle, chain
 #   n touching n flags = all other adjacent are safe
 
 # phase 2:
-# Better graph-like approach; add cells to a queue; flag then mark safe, then add
-# neighbors
+# Better graph-like approach; add cells to a queue; flag then mark safe, then
+# add neighbors
 
 
 def sweep(grid):
@@ -101,13 +101,33 @@ def sweep(grid):
         except IndexError:
             break
 
-        cell = grid[y][x]
+        cell = int(grid[y][x])
 
-        # get flagged, unsolved and numbered neighbors -- in sets?
-        # evaluate for flagged neighbors == num -> mark unsolved as safe
-        # evaluate for flaggable -- then add numbered neighbors of flag to eval stackl
+        # maybe use tee() instead
+        numbered, unsolved, flagged = _neighbors(y, x, grid)
+        if len(flagged) == cell:
+            # all unsolved are safe
+            for y, x in unsolved:
+                grid[y][x] = 'S'
+                safe.add((y, x))
 
+            # is it necessary to re-evaluate this cell?
+            continue
 
+        elif len(flagged) > cell:
+            raise ValueError('More than {} flagged neighbors at {}, {}.'
+                             ''.format(cell, y, x))
+
+        if len(unsolved) + len(flagged) <= cell:
+            for u_y, u_x in unsolved:
+                grid[u_y][u_x] = 'F'
+
+                # re-evaluate all numbered neighbors of newly flagged cell
+                n_numbered, n_unsolved, n_flagged = _neighbors(u_y, u_x, grid)
+                to_evaluate.extend(n_numbered)
+    print('\n')
+    for row in grid:
+        print(row)
     return safe
 
 
@@ -137,19 +157,33 @@ def _unsolved_cells(sequence, grid):
             yield y, x
 
 
-def _flagged_cells(y, x, grid):
+def _flagged_cells(sequence, grid):
     """Generate only those neighbors with a flag."""
     for y, x in sequence:
         if grid[y][x] == 'F':
             yield y, x
 
 
-def _get_neighbors(y, x, grid):
-    """Generate all neighbors around the given coordinates."""
+def _neighbors(y, x, grid):
+    """Return sets of numbered, unsolved, flagged neighbors of given coords."""
+    numbered = set()
+    unsolved = set()
+    flagged = set()
     for n_y in range(max(0, y - 1), y + 2):
-        for n_x in range(max(0, x - 1), x + 2):
-            if not (y, x) == (n_y, n_x):
-                try:
-                    yield n_y, n_x
-                except IndexError:
-                    pass
+        if n_y != y:
+            x_iter = range(max(0, x - 1), x + 2)
+        else:
+            x_iter = (x - 1, x + 1) if x else (x + 1, )
+        for n_x in x_iter:
+            try:
+                cell = grid[n_y][n_x]
+            except IndexError:
+                pass
+            else:
+                if cell.isdigit():
+                    numbered.add((n_y, n_x))
+                elif cell == '?':
+                    unsolved.add((n_y, n_x))
+                elif cell == 'F':
+                    flagged.add((n_y, n_x))
+    return numbered, unsolved, flagged
