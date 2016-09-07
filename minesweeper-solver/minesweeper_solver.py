@@ -119,14 +119,6 @@ def _listify(grid):
     return [list(row) for row in grid.split('\n') if row]
 
 
-# def _get_cell(char):
-#     """Get the right char/type for the given cell."""
-#     try:
-#         return int(char)
-#     except ValueError:
-#         return char
-
-
 def _two_sweeps(grid):
     """Sweep forward once then backwards once across whole grid."""
     yield from chain(
