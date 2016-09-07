@@ -82,6 +82,10 @@ from itertools import cycle, chain
 #   etc
 #   n touching n flags = all other adjacent are safe
 
+# phase 2:
+# Better graph-like approach; add cells to a queue; flag then mark safe, then add
+# neighbors
+
 
 def sweep(grid):
     """Return a set of safe coordinates in the given grid."""
@@ -106,9 +110,11 @@ def sweep(grid):
                              ''.format(cell, y, x))
 
         unsolved_neighbors = list(_unsolved_neighbors(y, x, grid))
+        flagged_neighbors = list(_flagged_neighbors(y, x, grid))
 
-        # If there are less or equal unsolved neighbors than N, flag them all
-        if len(unsolved_neighbors) <= int(cell):
+        # If there are less or equal unsolved neighbors AND flagged than N,
+        # flag all the unsolved
+        if len(unsolved_neighbors) + len(flagged_neighbors) <= int(cell):
             for y, x in unsolved_neighbors:
                 grid[y][x] = 'F'
     return safe
