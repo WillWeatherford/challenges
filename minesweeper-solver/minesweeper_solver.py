@@ -107,11 +107,12 @@ def sweep(grid):
         numbered, unsolved, flagged = _neighbors(y, x, grid)
         if len(flagged) == cell:
             # all unsolved are safe
-            for y, x in unsolved:
-                grid[y][x] = 'S'
-                safe.add((y, x))
-
-            # is it necessary to re-evaluate this cell?
+            for u_y, u_x in unsolved:
+                grid[u_y][u_x] = 'S'
+                safe.add((u_y, u_x))
+                # re-evaluate all numbered neighbors of newly safed cell
+                n_numbered, n_unsolved, n_flagged = _neighbors(u_y, u_x, grid)
+                to_evaluate.extend(n_numbered)
             continue
 
         elif len(flagged) > cell:
