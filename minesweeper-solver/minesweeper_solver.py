@@ -120,6 +120,8 @@ def sweep(grid):
         if len(unsolved_neighbors) + len(flagged_neighbors) <= int(cell):
             for y, x in unsolved_neighbors:
                 grid[y][x] = 'F'
+    for row in grid:
+        print(row)
     return safe
 
 
@@ -132,7 +134,9 @@ def _two_sweeps(grid):
     """Sweep forward once then backwards once across whole grid."""
     yield from chain(
         _iter_numbered_cells(grid),
-        _iter_numbered_cells(grid)
+        _iter_numbered_cells(grid),
+        _iter_numbered_cells(grid),
+        _iter_numbered_cells(grid),
     )
 
 
