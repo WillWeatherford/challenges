@@ -94,11 +94,11 @@ def sweep(grid):
     """Return a set of safe coordinates in the given grid."""
     safe = set()
     grid = _listify(grid)
-    to_evaluate = list(_numbered_cells(_all_cells(grid), grid))
+    to_evaluate = set(_numbered_cells(_all_cells(grid), grid))
     while True:
         try:
             y, x = to_evaluate.pop()
-        except IndexError:
+        except KeyError:
             break
 
         cell = int(grid[y][x])
@@ -106,13 +106,13 @@ def sweep(grid):
         # maybe use tee() instead
         numbered, unsolved, flagged = _neighbors(y, x, grid)
         if len(flagged) == cell:
-            # all unsolved are safe
+            # Deduce that all unsolved are safe
             for u_y, u_x in unsolved:
                 grid[u_y][u_x] = 'S'
                 safe.add((u_y, u_x))
                 # re-evaluate all numbered neighbors of newly safed cell
                 n_numbered, n_unsolved, n_flagged = _neighbors(u_y, u_x, grid)
-                to_evaluate.extend(n_numbered)
+                to_evaluate.update(n_numbered)
             continue
 
         elif len(flagged) > cell:
@@ -121,11 +121,12 @@ def sweep(grid):
 
         if len(unsolved) + len(flagged) <= cell:
             for u_y, u_x in unsolved:
+                # Deduce that these neighbors should be flagged
                 grid[u_y][u_x] = 'F'
 
                 # re-evaluate all numbered neighbors of newly flagged cell
                 n_numbered, n_unsolved, n_flagged = _neighbors(u_y, u_x, grid)
-                to_evaluate.extend(n_numbered)
+                to_evaluate.update(n_numbered)
     print('\n')
     for row in grid:
         print(row)
