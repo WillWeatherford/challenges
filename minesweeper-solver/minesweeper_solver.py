@@ -94,10 +94,19 @@ def sweep(grid):
     """Return a set of safe coordinates in the given grid."""
     safe = set()
     grid = _listify(grid)
-    numbered_to_evaluate = list(_numbered_cells(_all_cells(grid), grid))
-    flagged_to_evaluate = []
+    to_evaluate = list(_numbered_cells(_all_cells(grid), grid))
     while True:
-        pass
+        try:
+            y, x = to_evaluate.pop()
+        except IndexError:
+            break
+
+        cell = grid[y][x]
+
+        # get flagged, unsolved and numbered neighbors -- in sets?
+        # evaluate for flagged neighbors == num -> mark unsolved as safe
+        # evaluate for flaggable -- then add numbered neighbors of flag to eval stackl
+
 
     return safe
 
