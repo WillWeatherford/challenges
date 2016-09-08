@@ -29,11 +29,32 @@ def calc_profit(array):
     Profit is the difference between the values at sell date and buy
     date, being the maximum difference possible from the given list.
     """
-    enum = list(enumerate(array))
-    buy_idx, buy_val = min(enum, key=itemgetter(1))
-    sell_idx, sell_val = max(enum, key=itemgetter(1))
+    best_result = (0, 0, 0)
+    lowest_idx, lowest_num = 0, array[0]
 
-    if not sell_idx > buy_idx:
-        return 0, 0, 0
+    # Iterate over everything but first value since we already have it.
+    for idx, num in enumerate(array):
 
-    return buy_idx, sell_idx, sell_val - buy_val
+        # Update overall minimum value so far if necessary.
+        if num < lowest_num:
+            lowest_idx, lowest_num = idx, num
+            # If we have seen the lowest number, there's no chance we can find
+            # best profit result at current number, so continue.
+            continue
+
+        # Checking profit with current num agaist lowest number overall.
+        current_result = (lowest_idx, idx, num - lowest_num)
+        best_result = max(best_result, current_result, key=itemgetter(2))
+
+    return best_result
+
+
+def calc_profit_nsquared(array):
+    """O(n ** 2) version of calc_profit for performance comparison."""
+    best = (0, 0, 0)
+    for idx1, num1 in enumerate(array):
+        for idx2, num2 in enumerate(array[idx1 + 1:]):
+            profit = num2 - num1
+            if profit > best[2]:
+                best = (idx1, idx1 + 1 + idx2, profit)
+    return best
