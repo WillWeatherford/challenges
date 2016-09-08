@@ -112,6 +112,7 @@ def sweep(grid):
         n1, n2 = tee(_neighbors(y, x, grid), 2)
         unsolved = set(filter(_unsolved, n1))
         flagged = set(filter(_flagged, n2))
+        to_reevaluate = set()
 
         if len(flagged) == cell:
             # Deduce that all unsolved are safe
@@ -119,9 +120,7 @@ def sweep(grid):
                 grid[u_y][u_x] = 'S'
                 safe.add((u_y, u_x))
                 # re-evaluate all numbered neighbors of newly safed cell
-                n_numbered = filter(_numbered, _neighbors(u_y, u_x, grid))
-                to_evaluate.update(n_numbered)
-            continue
+                to_reevaluate.update(_neighbors(u_y, u_x, grid))
 
         elif len(flagged) > cell:
             raise ValueError('More than {} flagged neighbors at {}, {}.'
@@ -134,8 +133,9 @@ def sweep(grid):
                 grid[u_y][u_x] = 'F'
 
                 # re-evaluate all numbered neighbors of newly flagged cell
-                n_numbered = filter(_numbered, _neighbors(u_y, u_x, grid))
-                to_evaluate.update(n_numbered)
+                to_reevaluate.update(_neighbors(u_y, u_x, grid))
+
+        to_evaluate.update(filter(_numbered, to_reevaluate))
 
     print('\n')
     for row in grid:
@@ -173,25 +173,25 @@ def _is_flagged(coords, grid=None):
     return grid[y][x] == 'F'
 
 
-def _numbered_cells(sequence, grid):
-    """Filter only numbered cells of sequence."""
-    for y, x in sequence:
-        if grid[y][x].isdigit():
-            yield y, x
+# def _numbered_cells(sequence, grid):
+#     """Filter only numbered cells of sequence."""
+#     for y, x in sequence:
+#         if grid[y][x].isdigit():
+#             yield y, x
 
 
-def _unsolved_cells(sequence, grid):
-    """Generate only those neighbors where the cell is uncovered."""
-    for y, x in sequence:
-        if grid[y][x] == '?':
-            yield y, x
+# def _unsolved_cells(sequence, grid):
+#     """Generate only those neighbors where the cell is uncovered."""
+#     for y, x in sequence:
+#         if grid[y][x] == '?':
+#             yield y, x
 
 
-def _flagged_cells(sequence, grid):
-    """Generate only those neighbors with a flag."""
-    for y, x in sequence:
-        if grid[y][x] == 'F':
-            yield y, x
+# def _flagged_cells(sequence, grid):
+#     """Generate only those neighbors with a flag."""
+#     for y, x in sequence:
+#         if grid[y][x] == 'F':
+#             yield y, x
 
 
 def _neighbors(y, x, grid):
