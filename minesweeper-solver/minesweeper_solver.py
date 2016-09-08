@@ -96,6 +96,8 @@ def sweep(grid):
     safe = set()
     grid = _listify(grid)
     _numbered = partial(_is_numbered, grid=grid)
+    _unsolved = partial(_is_unsolved, grid=grid)
+    _flagged = partial(_is_flagged, grid=grid)
     to_evaluate = set(filter(_numbered, _all_cells(grid)))
 
     while True:
@@ -108,8 +110,8 @@ def sweep(grid):
 
         # maybe use tee() instead
         n1, n2 = tee(_neighbors(y, x, grid), 2)
-        unsolved = set(_unsolved_cells(n1, grid))
-        flagged = set(_flagged_cells(n2, grid))
+        unsolved = set(filter(_unsolved, n1))
+        flagged = set(filter(_flagged, n2))
 
         if len(flagged) == cell:
             # Deduce that all unsolved are safe
