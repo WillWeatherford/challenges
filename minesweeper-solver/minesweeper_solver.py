@@ -68,6 +68,7 @@ execute the clicks.
 """
 from __future__ import unicode_literals, division
 from itertools import cycle, chain, tee
+from functools import partial
 
 # Iterate across whole board -- any way to speed up?
 # Should be able to modify in place and continue working, without modifying
@@ -94,7 +95,10 @@ def sweep(grid):
     """Return a set of safe coordinates in the given grid."""
     safe = set()
     grid = _listify(grid)
+    _numbered = partial(func)
+
     to_evaluate = set(_numbered_cells(_all_cells(grid), grid))
+    
     while True:
         try:
             y, x = to_evaluate.pop()
@@ -149,6 +153,24 @@ def _all_cells(grid):
     for y, row in enumerate(grid):
         for x, _ in enumerate(row):
             yield y, x
+
+
+def _is_numbered(coords, grid=None):
+    """Partialized filter function."""
+    y, x = coords
+    return grid[y][x].isdigit()
+
+
+def _is_unsolved(coords, grid=None):
+    """Partialized filter function."""
+    y, x = coords
+    return grid[y][x] == '?'
+
+
+def _is_flagged(coords, grid=None):
+    """Partialized filter function."""
+    y, x = coords
+    return grid[y][x] == 'F'
 
 
 def _numbered_cells(sequence, grid):
