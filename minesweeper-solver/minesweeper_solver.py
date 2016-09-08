@@ -67,7 +67,7 @@ board state from the pixels, run the algorithm and manipulate the cursor to
 execute the clicks.
 """
 from __future__ import unicode_literals, division
-from itertools import cycle, chain
+from itertools import cycle, chain, tee
 
 # Iterate across whole board -- any way to speed up?
 # Should be able to modify in place and continue working, without modifying
@@ -104,14 +104,17 @@ def sweep(grid):
         cell = int(grid[y][x])
 
         # maybe use tee() instead
-        numbered, unsolved, flagged = _neighbors(y, x, grid)
+        n1, n2 = tee(_neighbors(y, x, grid), 2)
+        unsolved = set(_unsolved_cells(n1, grid))
+        flagged = set(_flagged_cells(n2, grid))
+
         if len(flagged) == cell:
             # Deduce that all unsolved are safe
             for u_y, u_x in unsolved:
                 grid[u_y][u_x] = 'S'
                 safe.add((u_y, u_x))
                 # re-evaluate all numbered neighbors of newly safed cell
-                n_numbered, n_unsolved, n_flagged = _neighbors(u_y, u_x, grid)
+                n_numbered = _numbered_cells(_neighbors(u_y, u_x, grid), grid)
                 to_evaluate.update(n_numbered)
             continue
 
@@ -119,14 +122,17 @@ def sweep(grid):
             raise ValueError('More than {} flagged neighbors at {}, {}.'
                              ''.format(cell, y, x))
 
+        # import pdb;pdb.set_trace()
         if len(unsolved) + len(flagged) <= cell:
             for u_y, u_x in unsolved:
                 # Deduce that these neighbors should be flagged
                 grid[u_y][u_x] = 'F'
 
                 # re-evaluate all numbered neighbors of newly flagged cell
-                n_numbered, n_unsolved, n_flagged = _neighbors(u_y, u_x, grid)
+                n_numbered = _numbered_cells(_neighbors(u_y, u_x, grid), grid)
                 to_evaluate.update(n_numbered)
+
+
     print('\n')
     for row in grid:
         print(row)
@@ -168,9 +174,6 @@ def _flagged_cells(sequence, grid):
 
 def _neighbors(y, x, grid):
     """Return sets of numbered, unsolved, flagged neighbors of given coords."""
-    numbered = set()
-    unsolved = set()
-    flagged = set()
     for n_y in range(max(0, y - 1), y + 2):
         if n_y != y:
             x_iter = range(max(0, x - 1), x + 2)
@@ -178,14 +181,21 @@ def _neighbors(y, x, grid):
             x_iter = (x - 1, x + 1) if x else (x + 1, )
         for n_x in x_iter:
             try:
-                cell = grid[n_y][n_x]
+                grid[n_y][n_x]
             except IndexError:
                 pass
             else:
-                if cell.isdigit():
-                    numbered.add((n_y, n_x))
-                elif cell == '?':
-                    unsolved.add((n_y, n_x))
-                elif cell == 'F':
-                    flagged.add((n_y, n_x))
-    return numbered, unsolved, flagged
+                yield n_y, n_x
+
+
+    # numbered = set()
+    # unsolved = set()
+    # flagged = set()
+    #         else:
+    #             if cell.isdigit():
+    #                 numbered.add((n_y, n_x))
+    #             elif cell == '?':
+    #                 unsolved.add((n_y, n_x))
+    #             elif cell == 'F':
+    #                 flagged.add((n_y, n_x))
+    # return numbered, unsolved, flagged
