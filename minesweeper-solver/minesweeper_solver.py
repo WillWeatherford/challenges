@@ -95,10 +95,9 @@ def sweep(grid):
     """Return a set of safe coordinates in the given grid."""
     safe = set()
     grid = _listify(grid)
-    _numbered = partial(func)
+    _numbered = partial(_is_numbered, grid=grid)
+    to_evaluate = set(filter(_numbered, _all_cells(grid)))
 
-    to_evaluate = set(_numbered_cells(_all_cells(grid), grid))
-    
     while True:
         try:
             y, x = to_evaluate.pop()
