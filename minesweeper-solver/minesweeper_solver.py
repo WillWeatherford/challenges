@@ -42,16 +42,19 @@ For the above input example this would be:
 6 2
 6 7
 
-Challenge input
+Challenge Input
 
 As suggested by /u/wutaki, this input is a greater challenge then the original:
 
 ??????
-???2??
-???4??
-?2??2?
+??F2F?
+F??4?F
+S2FF2S
 ?2222?
-?1  1?
+F1  1F
+
+3 0
+3 5
 
 Minesweeper is a game of both logic and luck. Sometimes it is impossible to
 find free fields through logic. The right output would then be an empty list.
@@ -64,7 +67,8 @@ board state from the pixels, run the algorithm and manipulate the cursor to
 execute the clicks.
 """
 from __future__ import unicode_literals, division
-from itertools import cycle, chain
+from itertools import cycle, chain, tee
+from functools import partial
 
 # Iterate across whole board -- any way to speed up?
 # Should be able to modify in place and continue working, without modifying
@@ -82,35 +86,64 @@ from itertools import cycle, chain
 #   etc
 #   n touching n flags = all other adjacent are safe
 
+# phase 2:
+# Better graph-like approach; add cells to a queue; flag then mark safe, then
+# add neighbors
+
 
 def sweep(grid):
     """Return a set of safe coordinates in the given grid."""
     safe = set()
     grid = _listify(grid)
-    for y, x, cell in _two_sweeps(grid):
-        flagged_neighbors = list(_flagged_neighbors(y, x, grid))
 
-        # When the number of flagged numbers equals the current number,
-        # the rest of unsolved neighbors are all safe.
-        # import pdb;pdb.set_trace()
-        if len(flagged_neighbors) == int(cell):
-            for y, x in _unsolved_neighbors(y, x, grid):
-                grid[y][x] = 'S'
-                safe.add((y, x))
+    # Set up filter functions with grid argument pre-baked in using partial.
+    is_numbered = partial(_is_numbered, grid=grid)
+    is_unsolved = partial(_is_unsolved, grid=grid)
+    is_flagged = partial(_is_flagged, grid=grid)
 
-        elif len(flagged_neighbors) > int(cell):
-            for row in grid:
-                print(row)
-            # import pdb;pdb.set_trace()
+    # Need to evaluate all numbered cells in the grid.
+    to_evaluate = set(filter(is_numbered, _all_cells(grid)))
+
+    while True:
+        try:
+            y, x = to_evaluate.pop()
+        except KeyError:
+            # When there are no more cells left to evaluate, we're done.
+            break
+
+        cell = int(grid[y][x])
+        to_reevaluate = set()
+
+        # Use the neighbors generator in two different filtered ways.
+        n1, n2 = tee(_neighbors(y, x, grid), 2)
+        unsolved = set(filter(is_unsolved, n1))
+        flagged = set(filter(is_flagged, n2))
+
+        if len(flagged) == cell:
+            # Deduce that all unsolved are safe
+            for u_y, u_x in unsolved:
+                grid[u_y][u_x] = 'S'
+                safe.add((u_y, u_x))
+                # Re-evaluate all numbered neighbors of newly safed cell.
+                to_reevaluate.update(_neighbors(u_y, u_x, grid))
+
+        elif len(flagged) > cell:
             raise ValueError('More than {} flagged neighbors at {}, {}.'
                              ''.format(cell, y, x))
 
-        unsolved_neighbors = list(_unsolved_neighbors(y, x, grid))
+        if len(unsolved) + len(flagged) <= cell:
+            # Deduce that these neighbors should be flagged
+            for u_y, u_x in unsolved:
+                grid[u_y][u_x] = 'F'
 
-        # If there are less or equal unsolved neighbors than N, flag them all
-        if len(unsolved_neighbors) <= int(cell):
-            for y, x in unsolved_neighbors:
-                grid[y][x] = 'F'
+                # Re-evaluate all numbered neighbors of newly flagged cell.
+                to_reevaluate.update(_neighbors(u_y, u_x, grid))
+
+        to_evaluate.update(filter(is_numbered, to_reevaluate))
+
+    print('\n')
+    for row in grid:
+        print(row)
     return safe
 
 
@@ -119,51 +152,42 @@ def _listify(grid):
     return [list(row) for row in grid.split('\n') if row]
 
 
-# def _get_cell(char):
-#     """Get the right char/type for the given cell."""
-#     try:
-#         return int(char)
-#     except ValueError:
-#         return char
-
-
-def _two_sweeps(grid):
-    """Sweep forward once then backwards once across whole grid."""
-    yield from chain(
-        _iter_numbered_cells(grid),
-        _iter_numbered_cells(grid)
-    )
-
-
-def _iter_numbered_cells(grid):
+def _all_cells(grid):
     """Generate all coordinates in the grid."""
     for y, row in enumerate(grid):
         for x, _ in enumerate(row):
-            cell = grid[y][x]
-            if cell.isdigit():
-                yield y, x, cell
+            yield y, x
 
 
-def _unsolved_neighbors(y, x, grid):
-    """Generate only those neighbors where the cell is uncovered."""
-    for n_y, n_x, nei in _get_neighbors(y, x, grid):
-        if nei == '?':
-            yield n_y, n_x
+def _is_numbered(coords, grid=None):
+    """Partialized filter function."""
+    y, x = coords
+    return grid[y][x].isdigit()
 
 
-def _flagged_neighbors(y, x, grid):
-    """Generate only those neighbors with a flag."""
-    for n_y, n_x, nei in _get_neighbors(y, x, grid):
-        if nei == 'F':
-            yield n_y, n_x
+def _is_unsolved(coords, grid=None):
+    """Partialized filter function."""
+    y, x = coords
+    return grid[y][x] == '?'
 
 
-def _get_neighbors(y, x, grid):
-    """Generate all neighbors around the given coordinates."""
+def _is_flagged(coords, grid=None):
+    """Partialized filter function."""
+    y, x = coords
+    return grid[y][x] == 'F'
+
+
+def _neighbors(y, x, grid):
+    """Return sets of numbered, unsolved, flagged neighbors of given coords."""
     for n_y in range(max(0, y - 1), y + 2):
-        for n_x in range(max(0, x - 1), x + 2):
-            if not (y, x) == (n_y, n_x):
-                try:
-                    yield n_y, n_x, grid[n_y][n_x]
-                except IndexError:
-                    pass
+        if n_y != y:
+            x_iter = range(max(0, x - 1), x + 2)
+        else:
+            x_iter = (x - 1, x + 1) if x else (x + 1, )
+        for n_x in x_iter:
+            try:
+                grid[n_y][n_x]
+            except IndexError:
+                pass
+            else:
+                yield n_y, n_x
