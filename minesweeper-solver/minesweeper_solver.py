@@ -119,7 +119,7 @@ def sweep(grid):
                 grid[u_y][u_x] = 'S'
                 safe.add((u_y, u_x))
                 # re-evaluate all numbered neighbors of newly safed cell
-                n_numbered = _numbered_cells(_neighbors(u_y, u_x, grid), grid)
+                n_numbered = filter(_numbered, _neighbors(u_y, u_x, grid))
                 to_evaluate.update(n_numbered)
             continue
 
@@ -134,9 +134,8 @@ def sweep(grid):
                 grid[u_y][u_x] = 'F'
 
                 # re-evaluate all numbered neighbors of newly flagged cell
-                n_numbered = _numbered_cells(_neighbors(u_y, u_x, grid), grid)
+                n_numbered = filter(_numbered, _neighbors(u_y, u_x, grid))
                 to_evaluate.update(n_numbered)
-
 
     print('\n')
     for row in grid:
