@@ -95,47 +95,51 @@ def sweep(grid):
     """Return a set of safe coordinates in the given grid."""
     safe = set()
     grid = _listify(grid)
-    _numbered = partial(_is_numbered, grid=grid)
-    _unsolved = partial(_is_unsolved, grid=grid)
-    _flagged = partial(_is_flagged, grid=grid)
-    to_evaluate = set(filter(_numbered, _all_cells(grid)))
+
+    # Set up filter functions with grid argument pre-baked in using partial.
+    is_numbered = partial(_is_numbered, grid=grid)
+    is_unsolved = partial(_is_unsolved, grid=grid)
+    is_flagged = partial(_is_flagged, grid=grid)
+
+    # Need to evaluate all numbered cells in the grid.
+    to_evaluate = set(filter(is_numbered, _all_cells(grid)))
 
     while True:
         try:
             y, x = to_evaluate.pop()
         except KeyError:
+            # When there are no more cells left to evaluate, we're done.
             break
 
         cell = int(grid[y][x])
-
-        # maybe use tee() instead
-        n1, n2 = tee(_neighbors(y, x, grid), 2)
-        unsolved = set(filter(_unsolved, n1))
-        flagged = set(filter(_flagged, n2))
         to_reevaluate = set()
+
+        # Use the neighbors generator in two different filtered ways.
+        n1, n2 = tee(_neighbors(y, x, grid), 2)
+        unsolved = set(filter(is_unsolved, n1))
+        flagged = set(filter(is_flagged, n2))
 
         if len(flagged) == cell:
             # Deduce that all unsolved are safe
             for u_y, u_x in unsolved:
                 grid[u_y][u_x] = 'S'
                 safe.add((u_y, u_x))
-                # re-evaluate all numbered neighbors of newly safed cell
+                # Re-evaluate all numbered neighbors of newly safed cell.
                 to_reevaluate.update(_neighbors(u_y, u_x, grid))
 
         elif len(flagged) > cell:
             raise ValueError('More than {} flagged neighbors at {}, {}.'
                              ''.format(cell, y, x))
 
-        # import pdb;pdb.set_trace()
         if len(unsolved) + len(flagged) <= cell:
+            # Deduce that these neighbors should be flagged
             for u_y, u_x in unsolved:
-                # Deduce that these neighbors should be flagged
                 grid[u_y][u_x] = 'F'
 
-                # re-evaluate all numbered neighbors of newly flagged cell
+                # Re-evaluate all numbered neighbors of newly flagged cell.
                 to_reevaluate.update(_neighbors(u_y, u_x, grid))
 
-        to_evaluate.update(filter(_numbered, to_reevaluate))
+        to_evaluate.update(filter(is_numbered, to_reevaluate))
 
     print('\n')
     for row in grid:
@@ -173,27 +177,6 @@ def _is_flagged(coords, grid=None):
     return grid[y][x] == 'F'
 
 
-# def _numbered_cells(sequence, grid):
-#     """Filter only numbered cells of sequence."""
-#     for y, x in sequence:
-#         if grid[y][x].isdigit():
-#             yield y, x
-
-
-# def _unsolved_cells(sequence, grid):
-#     """Generate only those neighbors where the cell is uncovered."""
-#     for y, x in sequence:
-#         if grid[y][x] == '?':
-#             yield y, x
-
-
-# def _flagged_cells(sequence, grid):
-#     """Generate only those neighbors with a flag."""
-#     for y, x in sequence:
-#         if grid[y][x] == 'F':
-#             yield y, x
-
-
 def _neighbors(y, x, grid):
     """Return sets of numbered, unsolved, flagged neighbors of given coords."""
     for n_y in range(max(0, y - 1), y + 2):
@@ -208,16 +191,3 @@ def _neighbors(y, x, grid):
                 pass
             else:
                 yield n_y, n_x
-
-
-    # numbered = set()
-    # unsolved = set()
-    # flagged = set()
-    #         else:
-    #             if cell.isdigit():
-    #                 numbered.add((n_y, n_x))
-    #             elif cell == '?':
-    #                 unsolved.add((n_y, n_x))
-    #             elif cell == 'F':
-    #                 flagged.add((n_y, n_x))
-    # return numbered, unsolved, flagged
