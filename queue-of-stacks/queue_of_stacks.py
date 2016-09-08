@@ -9,7 +9,7 @@ be dequeued.
 A "reversed" stack where the top is the "back" i.e. where items go when
 enqueued.
 
-The flag attribute "_reverse" keeps track of which stack is active. When the 
+The flag attribute "_reverse" keeps track of which stack is active. When the
 operation alternates between enqueue and dequeue, the "_transfer" method will
 flip all items from one stack to the other, and flip the "_reverse" boolean.
 
@@ -25,24 +25,19 @@ class QueueOfStacks(object):
 
     def __init__(self):
         """Initialize the Queue with two stacks holding data."""
-        self._stack = Stack()
-        self._reverse_stack = Stack()
-        self._reverse = False
+        self._out_stack = Stack()
+        self._in_stack = Stack()
         self._size = 0
 
     def enqueue(self, val):
         """Add an item to the Queue."""
-        if not self._reverse:
-            self._transfer(self._stack, self._reverse_stack)
-        self._reverse_stack.push(val)
+        self._in_stack.push(val)
         self._size += 1
 
     def dequeue(self):
         """Remove the front item in the Queue and return it."""
-        if self._reverse:
-            self._transfer(self._reverse_stack, self._stack)
         try:
-            item = self._stack.pop()
+            item = self._pop()
             self._size -= 1
             return item
         except IndexError:
@@ -50,11 +45,9 @@ class QueueOfStacks(object):
 
     def peek(self):
         """Return the front item in the Queue without removing it."""
-        if self._reverse:
-            self._transfer(self._reverse_stack, self._stack)
         try:
-            item = self._stack.pop()
-            self._stack.push(item)
+            item = self._pop()
+            self._out_stack.push(item)
             return item
         except IndexError:
             return None
@@ -63,11 +56,19 @@ class QueueOfStacks(object):
         """Return the length of the Queue."""
         return self._size
 
-    def _transfer(self, from_stack, to_stack):
+    def _pop(self):
+        """Pop item from out stack, transferring or raising error if needed."""
+        try:
+            item = self._out_stack.pop()
+        except IndexError:
+            self._transfer()
+            item = self._out_stack.pop()
+        return item
+
+    def _transfer(self):
         """Transfer all items from the from_stack to the to_stack."""
         while True:
             try:
-                to_stack.push(from_stack.pop())
+                self._out_stack.push(self._in_stack.pop())
             except IndexError:
                 break
-        self._reverse = not self._reverse
