@@ -95,8 +95,10 @@ def sweep(grid):
     safe = set()
     grid = _listify(grid)
 
-    # Set up neighbors function with grid argument pre-baked in using partial.
+    # Set up functions with grid argument pre-baked in using partial.
     neighbors = partial(_neighbors, grid=grid)
+    lookup = partial(_lookup, grid=grid)
+    set_cell = partial(_set_cell, grid=grid)
 
     # Need to evaluate all numbered cells in the grid.
     to_evaluate = set(filter(_is_numbered, _all_cells(grid)))
@@ -104,41 +106,41 @@ def sweep(grid):
     while True:
         try:
             # Discard the cell value previously stored in the to_evaluate set.
-            y, x, _ = to_evaluate.pop()
+            coords, _ = to_evaluate.pop()
         except KeyError:
             # When there are no more cells left to evaluate, we're done.
             break
 
         # Make sure to get the new cell value directly from the grid.
-        cell_value = int(grid[y][x])
+        cell_value = int(lookup(coords))
 
         # Use the neighbors generator in two different filtered ways.
-        n1, n2 = tee(neighbors(y, x), 2)
+        n1, n2 = tee(neighbors(coords), 2)
         unsolved = set(filter(_is_unsolved, n1))
         flagged = set(filter(_is_flagged, n2))
 
         if len(flagged) == cell_value:
             # Deduce that all unsolved neighbor cells are safe.
-            for u_y, u_x, _ in unsolved:
-                grid[u_y][u_x] = 'S'
-                safe.add((u_y, u_x))
+            for u_coords, _ in unsolved:
+                set_cell(u_coords, 'S')
+                safe.add(u_coords)
 
                 # Re-evaluate all numbered neighbors of the newly safed cell.
-                to_evaluate.update(filter(_is_numbered, neighbors(u_y, u_x)))
+                to_evaluate.update(filter(_is_numbered, neighbors(u_coords)))
 
         # Sanity check: if the flagged neighbors outnumber the cell, something
         # has gone horribly wrong.
         elif len(flagged) > cell_value:
-            raise ValueError('More than {} flagged neighbors at {}, {}.'
-                             ''.format(cell_value, y, x))
+            raise ValueError('More than {} flagged neighbors at {}.'
+                             ''.format(cell_value, coords))
 
         if len(unsolved) + len(flagged) <= cell_value:
             # Deduce that these neighbors should be flagged.
-            for u_y, u_x, _ in unsolved:
-                grid[u_y][u_x] = 'F'
+            for u_coords, _ in unsolved:
+                set_cell(u_coords, 'F')
 
                 # Re-evaluate all numbered neighbors of the newly flagged cell.
-                to_evaluate.update(filter(_is_numbered, neighbors(u_y, u_x)))
+                to_evaluate.update(filter(_is_numbered, neighbors(u_coords)))
 
     return safe
 
@@ -152,6 +154,14 @@ def _lookup(coords, grid=None):
         raise IndexError('Coordinates {} are outside the grid.'.format(coords))
 
 
+def _set_cell(coords, cell_value, grid=None):
+    y, x = coords
+    try:
+        grid[y][x] = cell_value
+    except IndexError:
+        raise IndexError('Coordinates {} are outside the grid.'.format(coords))
+
+
 def _listify(grid):
     """Convert a string grid into a list of lists."""
     return [list(row) for row in grid.split('\n') if row]
@@ -161,31 +171,32 @@ def _all_cells(grid):
     """Generate all coordinates in the grid."""
     for y, row in enumerate(grid):
         for x, value in enumerate(row):
-            yield y, x, value
+            yield (y, x), value
 
 
 def _is_numbered(coords_and_value):
     """Return boolean of whether there is a number at given coords."""
-    return coords_and_value[2].isdigit()
+    return coords_and_value[1].isdigit()
 
 
 def _is_unsolved(coords_and_value):
     """Return boolean of whether the cell at given coords is unsolved."""
-    return coords_and_value[2] == '?'
+    return coords_and_value[1] == '?'
 
 
 def _is_flagged(coords_and_value):
     """Return boolean of whether cell at given coords is flagged."""
-    return coords_and_value[2] == 'F'
+    return coords_and_value[1] == 'F'
 
 
-def _neighbors(y, x, grid=None):
+def _neighbors(coords, grid=None):
     """Generate coordinates of all 8 neighbors around given y, x coords."""
+    y, x = coords
     y_range = range(max(0, y - 1), y + 2)
     x_range = range(max(0, x - 1), x + 2)
-    for n_y, n_x in product(y_range, x_range):
-        if (n_y, n_x) != (y, x):
+    for n_coords in product(y_range, x_range):
+        if (n_coords) != coords:
             try:
-                yield n_y, n_x, grid[n_y][n_x]
+                yield n_coords, _lookup(n_coords, grid)
             except IndexError:
                 pass
