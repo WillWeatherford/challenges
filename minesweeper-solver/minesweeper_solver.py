@@ -55,6 +55,9 @@ F1  1F
 
 3 0
 3 5
+0 2
+0 3
+0 4
 
 Minesweeper is a game of both logic and luck. Sometimes it is impossible to
 find free fields through logic. The right output would then be an empty list.
@@ -67,7 +70,7 @@ board state from the pixels, run the algorithm and manipulate the cursor to
 execute the clicks.
 """
 from __future__ import unicode_literals, division
-from itertools import cycle, chain, tee
+from itertools import tee
 from functools import partial
 
 # Iterate across whole board -- any way to speed up?
@@ -86,10 +89,6 @@ from functools import partial
 #   etc
 #   n touching n flags = all other adjacent are safe
 
-# phase 2:
-# Better graph-like approach; add cells to a queue; flag then mark safe, then
-# add neighbors
-
 
 def sweep(grid):
     """Return a set of safe coordinates in the given grid."""
@@ -100,6 +99,8 @@ def sweep(grid):
     is_numbered = partial(_is_numbered, grid=grid)
     is_unsolved = partial(_is_unsolved, grid=grid)
     is_flagged = partial(_is_flagged, grid=grid)
+
+    neighbors = partial(_neighbors, grid=grid)
 
     # Need to evaluate all numbered cells in the grid.
     to_evaluate = set(filter(is_numbered, _all_cells(grid)))
@@ -115,7 +116,7 @@ def sweep(grid):
         to_reevaluate = set()
 
         # Use the neighbors generator in two different filtered ways.
-        n1, n2 = tee(_neighbors(y, x, grid), 2)
+        n1, n2 = tee(neighbors(y, x), 2)
         unsolved = set(filter(is_unsolved, n1))
         flagged = set(filter(is_flagged, n2))
 
@@ -125,7 +126,7 @@ def sweep(grid):
                 grid[u_y][u_x] = 'S'
                 safe.add((u_y, u_x))
                 # Re-evaluate all numbered neighbors of newly safed cell.
-                to_reevaluate.update(_neighbors(u_y, u_x, grid))
+                to_reevaluate.update(neighbors(u_y, u_x))
 
         elif len(flagged) > cell:
             raise ValueError('More than {} flagged neighbors at {}, {}.'
@@ -137,7 +138,7 @@ def sweep(grid):
                 grid[u_y][u_x] = 'F'
 
                 # Re-evaluate all numbered neighbors of newly flagged cell.
-                to_reevaluate.update(_neighbors(u_y, u_x, grid))
+                to_reevaluate.update(neighbors(u_y, u_x))
 
         to_evaluate.update(filter(is_numbered, to_reevaluate))
 
@@ -177,7 +178,7 @@ def _is_flagged(coords, grid=None):
     return grid[y][x] == 'F'
 
 
-def _neighbors(y, x, grid):
+def _neighbors(y, x, grid=None):
     """Return sets of numbered, unsolved, flagged neighbors of given coords."""
     for n_y in range(max(0, y - 1), y + 2):
         if n_y != y:
