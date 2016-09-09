@@ -38,10 +38,11 @@ class QueueOfStacks(object):
         """Remove the front item in the Queue and return it."""
         try:
             item = self._pop()
-            self._size -= 1
-            return item
         except IndexError:
             raise IndexError("Cannot dequeue from an empty Queue.")
+        else:
+            self._size -= 1
+            return item
 
     def peek(self):
         """Return the front item in the Queue without removing it."""
