@@ -99,7 +99,6 @@ def sweep(grid):
     is_numbered = partial(_is_numbered, grid=grid)
     is_unsolved = partial(_is_unsolved, grid=grid)
     is_flagged = partial(_is_flagged, grid=grid)
-
     neighbors = partial(_neighbors, grid=grid)
 
     # Need to evaluate all numbered cells in the grid.
@@ -120,25 +119,27 @@ def sweep(grid):
         flagged = set(filter(is_flagged, n2))
 
         if len(flagged) == cell:
-            # Deduce that all unsolved are safe
+            # Deduce that all unsolved neighbor cells are safe.
             for u_y, u_x in unsolved:
                 grid[u_y][u_x] = 'S'
                 safe.add((u_y, u_x))
 
-                # Re-evaluate all numbered neighbors of newly safed cell.
+                # Re-evaluate all numbered neighbors of the newly safed cell.
                 to_evaluate.update(filter(is_numbered, neighbors(u_y, u_x)))
 
+        # Sanity check: if the flagged neighbors outnumber the cell, something
+        # has gone horribly wrong.
         elif len(flagged) > cell:
             raise ValueError(
                 'More than {} flagged neighbors at {}, {}.'.format(cell, y, x)
             )
 
         if len(unsolved) + len(flagged) <= cell:
-            # Deduce that these neighbors should be flagged
+            # Deduce that these neighbors should be flagged.
             for u_y, u_x in unsolved:
                 grid[u_y][u_x] = 'F'
 
-                # Re-evaluate all numbered neighbors of newly flagged cell.
+                # Re-evaluate all numbered neighbors of the newly flagged cell.
                 to_evaluate.update(filter(is_numbered, neighbors(u_y, u_x)))
 
     return safe
@@ -157,25 +158,25 @@ def _all_cells(grid):
 
 
 def _is_numbered(coords, grid=None):
-    """Partialized filter function."""
+    """Return boolean of whether there is a number at given coords in grid."""
     y, x = coords
     return grid[y][x].isdigit()
 
 
 def _is_unsolved(coords, grid=None):
-    """Partialized filter function."""
+    """Return boolean of whether cell at given coords in grid is unsolved."""
     y, x = coords
     return grid[y][x] == '?'
 
 
 def _is_flagged(coords, grid=None):
-    """Partialized filter function."""
+    """Return boolean of whether cell at given coords in grid is flagged."""
     y, x = coords
     return grid[y][x] == 'F'
 
 
 def _neighbors(y, x, grid=None):
-    """Return sets of numbered, unsolved, flagged neighbors of given coords."""
+    """Generate coordinates of all 8 neighbors around given y, x coords."""
     for n_y in range(max(0, y - 1), y + 2):
         if n_y != y:
             x_iter = range(max(0, x - 1), x + 2)

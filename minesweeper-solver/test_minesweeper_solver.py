@@ -4,6 +4,8 @@ Checking that the correct "safe" cells are returned in y, x format.
 """
 import pytest
 
+GRID0 = ""
+
 GRID1 = """
 11
 1?
@@ -71,6 +73,7 @@ RESULT6 = {
 }
 
 CASES = [
+    (GRID0, set(), 0),
     (GRID1, set(), 2),
     (GRID2, set(), 3),
     (GRID3, {(1, 2), (2, 1)}, 3),
