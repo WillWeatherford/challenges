@@ -70,7 +70,7 @@ board state from the pixels, run the algorithm and manipulate the cursor to
 execute the clicks.
 """
 from __future__ import unicode_literals, division
-from itertools import tee
+from itertools import tee, product
 from functools import partial
 
 # Iterate across whole board -- any way to speed up?
@@ -95,10 +95,7 @@ def sweep(grid):
     safe = set()
     grid = _listify(grid)
 
-    # Set up filter functions with grid argument pre-baked in using partial.
-    # is_numbered = partial(_is_numbered, grid=grid)
-    # is_unsolved = partial(_is_unsolved, grid=grid)
-    # is_flagged = partial(_is_flagged, grid=grid)
+    # Set up neighbors function with grid argument pre-baked in using partial.
     neighbors = partial(_neighbors, grid=grid)
 
     # Need to evaluate all numbered cells in the grid.
@@ -146,6 +143,15 @@ def sweep(grid):
     return safe
 
 
+def _lookup(coords, grid=None):
+    """Return the value at the given coordinates in the grid."""
+    y, x = coords
+    try:
+        return grid[y][x]
+    except IndexError:
+        raise IndexError('Coordinates {} are outside the grid.'.format(coords))
+
+
 def _listify(grid):
     """Convert a string grid into a list of lists."""
     return [list(row) for row in grid.split('\n') if row]
@@ -175,15 +181,11 @@ def _is_flagged(coords_and_value):
 
 def _neighbors(y, x, grid=None):
     """Generate coordinates of all 8 neighbors around given y, x coords."""
-    for n_y in range(max(0, y - 1), y + 2):
-        if n_y != y:
-            x_iter = range(max(0, x - 1), x + 2)
-        else:
-            x_iter = (x - 1, x + 1) if x else (x + 1, )
-        for n_x in x_iter:
+    y_range = range(max(0, y - 1), y + 2)
+    x_range = range(max(0, x - 1), x + 2)
+    for n_y, n_x in product(y_range, x_range):
+        if (n_y, n_x) != (y, x):
             try:
-                cell_value = grid[n_y][n_x]
+                yield n_y, n_x, grid[n_y][n_x]
             except IndexError:
                 pass
-            else:
-                yield n_y, n_x, cell_value
