@@ -106,19 +106,21 @@ def sweep(grid):
 
     while True:
         try:
+            # Discard the cell value previously stored in the to_evaluate set.
             y, x, _ = to_evaluate.pop()
         except KeyError:
             # When there are no more cells left to evaluate, we're done.
             break
 
-        cell = int(grid[y][x])
+        # Make sure to get the new cell value directly from the grid.
+        cell_value = int(grid[y][x])
 
         # Use the neighbors generator in two different filtered ways.
         n1, n2 = tee(neighbors(y, x), 2)
         unsolved = set(filter(_is_unsolved, n1))
         flagged = set(filter(_is_flagged, n2))
 
-        if len(flagged) == cell:
+        if len(flagged) == cell_value:
             # Deduce that all unsolved neighbor cells are safe.
             for u_y, u_x, _ in unsolved:
                 grid[u_y][u_x] = 'S'
@@ -129,12 +131,11 @@ def sweep(grid):
 
         # Sanity check: if the flagged neighbors outnumber the cell, something
         # has gone horribly wrong.
-        elif len(flagged) > cell:
-            raise ValueError(
-                'More than {} flagged neighbors at {}, {}.'.format(cell, y, x)
-            )
+        elif len(flagged) > cell_value:
+            raise ValueError('More than {} flagged neighbors at {}, {}.'
+                             ''.format(cell_value, y, x))
 
-        if len(unsolved) + len(flagged) <= cell:
+        if len(unsolved) + len(flagged) <= cell_value:
             # Deduce that these neighbors should be flagged.
             for u_y, u_x, _ in unsolved:
                 grid[u_y][u_x] = 'F'
@@ -181,8 +182,8 @@ def _neighbors(y, x, grid=None):
             x_iter = (x - 1, x + 1) if x else (x + 1, )
         for n_x in x_iter:
             try:
-                cell = grid[n_y][n_x]
+                cell_value = grid[n_y][n_x]
             except IndexError:
                 pass
             else:
-                yield n_y, n_x, cell
+                yield n_y, n_x, cell_value
