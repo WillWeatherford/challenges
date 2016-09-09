@@ -113,7 +113,6 @@ def sweep(grid):
             break
 
         cell = int(grid[y][x])
-        to_reevaluate = set()
 
         # Use the neighbors generator in two different filtered ways.
         n1, n2 = tee(neighbors(y, x), 2)
@@ -125,12 +124,14 @@ def sweep(grid):
             for u_y, u_x in unsolved:
                 grid[u_y][u_x] = 'S'
                 safe.add((u_y, u_x))
+
                 # Re-evaluate all numbered neighbors of newly safed cell.
-                to_reevaluate.update(neighbors(u_y, u_x))
+                to_evaluate.update(filter(is_numbered, neighbors(u_y, u_x)))
 
         elif len(flagged) > cell:
-            raise ValueError('More than {} flagged neighbors at {}, {}.'
-                             ''.format(cell, y, x))
+            raise ValueError(
+                'More than {} flagged neighbors at {}, {}.'.format(cell, y, x)
+            )
 
         if len(unsolved) + len(flagged) <= cell:
             # Deduce that these neighbors should be flagged
@@ -138,13 +139,8 @@ def sweep(grid):
                 grid[u_y][u_x] = 'F'
 
                 # Re-evaluate all numbered neighbors of newly flagged cell.
-                to_reevaluate.update(neighbors(u_y, u_x))
+                to_evaluate.update(filter(is_numbered, neighbors(u_y, u_x)))
 
-        to_evaluate.update(filter(is_numbered, to_reevaluate))
-
-    print('\n')
-    for row in grid:
-        print(row)
     return safe
 
 
