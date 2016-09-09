@@ -135,7 +135,7 @@ def sweep(grid):
     return safe
 
 
-def _lookup_cell(coords, grid=None):
+def _lookup_cell(coords, grid):
     """Return the value at the given coordinates in the grid."""
     y, x = coords
     try:
@@ -144,7 +144,7 @@ def _lookup_cell(coords, grid=None):
         raise IndexError('Coordinates {} are outside the grid.'.format(coords))
 
 
-def _set_cell(coords, cell_value, grid=None):
+def _set_cell(coords, cell_value, grid):
     y, x = coords
     try:
         grid[y][x] = cell_value
@@ -179,7 +179,7 @@ def _is_flagged(coords_and_value):
     return coords_and_value[1] == FLAG
 
 
-def _neighbors(coords, grid=None):
+def _neighbors(coords, grid):
     """Generate coordinates of all 8 neighbors around given y, x coords."""
     y, x = coords
     y_range = range(max(0, y - 1), y + 2)
