@@ -73,21 +73,9 @@ from __future__ import unicode_literals, division
 from itertools import tee, product
 from functools import partial
 
-# Iterate across whole board -- any way to speed up?
-# Should be able to modify in place and continue working, without modifying
-# length of list.
-#
-# Check numbered square for obvious flag:
-#   1 touching only 1 ? == flag
-#   2 touching only 2 ? == flag
-#   etc
-#   n touching only n ? == flag
-
-# Flagged
-#   1 touching 1 flag = all other adjacent are safe
-#   2 touching 2 flag = all other adjacent are safe
-#   etc
-#   n touching n flags = all other adjacent are safe
+SAFE = 'S'
+FLAG = 'F'
+UNSOLVED = '?'
 
 
 def sweep(grid):
@@ -97,7 +85,7 @@ def sweep(grid):
 
     # Set up functions with grid argument pre-baked in using partial.
     neighbors = partial(_neighbors, grid=grid)
-    lookup = partial(_lookup, grid=grid)
+    lookup_cell = partial(_lookup_cell, grid=grid)
     set_cell = partial(_set_cell, grid=grid)
 
     # Need to evaluate all numbered cells in the grid.
@@ -112,7 +100,7 @@ def sweep(grid):
             break
 
         # Make sure to get the new cell value directly from the grid.
-        cell_value = int(lookup(coords))
+        cell_value = int(lookup_cell(coords))
 
         # Use the neighbors generator in two different filtered ways.
         n1, n2 = tee(neighbors(coords), 2)
@@ -121,8 +109,9 @@ def sweep(grid):
 
         if len(flagged) == cell_value:
             # Deduce that all unsolved neighbor cells are safe.
+
             for u_coords, _ in unsolved:
-                set_cell(u_coords, 'S')
+                set_cell(u_coords, SAFE)
                 safe.add(u_coords)
 
                 # Re-evaluate all numbered neighbors of the newly safed cell.
@@ -136,8 +125,9 @@ def sweep(grid):
 
         if len(unsolved) + len(flagged) <= cell_value:
             # Deduce that these neighbors should be flagged.
+
             for u_coords, _ in unsolved:
-                set_cell(u_coords, 'F')
+                set_cell(u_coords, FLAG)
 
                 # Re-evaluate all numbered neighbors of the newly flagged cell.
                 to_evaluate.update(filter(_is_numbered, neighbors(u_coords)))
@@ -145,7 +135,7 @@ def sweep(grid):
     return safe
 
 
-def _lookup(coords, grid=None):
+def _lookup_cell(coords, grid=None):
     """Return the value at the given coordinates in the grid."""
     y, x = coords
     try:
@@ -181,12 +171,12 @@ def _is_numbered(coords_and_value):
 
 def _is_unsolved(coords_and_value):
     """Return boolean of whether the cell at given coords is unsolved."""
-    return coords_and_value[1] == '?'
+    return coords_and_value[1] == UNSOLVED
 
 
 def _is_flagged(coords_and_value):
     """Return boolean of whether cell at given coords is flagged."""
-    return coords_and_value[1] == 'F'
+    return coords_and_value[1] == FLAG
 
 
 def _neighbors(coords, grid=None):
@@ -197,6 +187,6 @@ def _neighbors(coords, grid=None):
     for n_coords in product(y_range, x_range):
         if (n_coords) != coords:
             try:
-                yield n_coords, _lookup(n_coords, grid)
+                yield n_coords, _lookup_cell(n_coords, grid)
             except IndexError:
                 pass
