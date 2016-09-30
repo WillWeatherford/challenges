@@ -84,6 +84,7 @@ def sweep(grid):
     grid = _listify(grid)
 
     # Set up functions with grid argument pre-baked in using partial.
+    # Grid is a list of lists, which are mutable in place, so this will work.
     neighbors = partial(_neighbors, grid=grid)
     lookup_cell = partial(_lookup_cell, grid=grid)
     set_cell = partial(_set_cell, grid=grid)
@@ -185,7 +186,7 @@ def _neighbors(coords, grid):
     y_range = range(max(0, y - 1), y + 2)
     x_range = range(max(0, x - 1), x + 2)
     for n_coords in product(y_range, x_range):
-        if (n_coords) != coords:
+        if n_coords != coords:
             try:
                 yield n_coords, _lookup_cell(n_coords, grid)
             except IndexError:
