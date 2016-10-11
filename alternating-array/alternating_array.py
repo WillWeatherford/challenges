@@ -25,21 +25,12 @@ def alternate_iter(array):
     result = []
     array = sorted(array)
     for n in range(len(array)):
+        if n >= len(array):
+            break
         result.append(array.pop())
         try:
             result.append(array[n])
         except IndexError:
             break
-    return array
 
-
-def alternate_recur(array):
-    """Return array alternating between largest and smallest numbers."""
-    result = []
-    while array:
-        result.append(max(array))
-        try:
-            result.append(min(array))
-        except IndexError:
-            break
     return result
