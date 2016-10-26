@@ -17,12 +17,20 @@ DAMAGE_RELATION_CASES = [
     ('fighting', ['ice', 'rock'], {'ice': 2, 'rock': 2}),
 ]
 
+MULTIPLIER_CASES = [
+    (0, '0x'),
+    (0.5, '0.5x'),
+    (1, '1x'),
+    (2, '2x'),
+    (4, '4x'),
+]
+
 
 @pytest.mark.parametrize('attack, multiplyer', OUTPUT_CASES)
 def test_output(attack, multiplyer):
     """Test that input with attacking and target returns correct multiplyer."""
-    from poke_damage import calculate
-    assert calculate(attack) == multiplyer
+    from poke_damage import main
+    assert main(attack) == multiplyer
 
 
 @pytest.mark.parametrize('attack, defenders, expected', DAMAGE_RELATION_CASES)
@@ -32,3 +40,10 @@ def test_damage_relations(attack, defenders, expected):
     type_data = get_type_data(attack)
     result = parse_damage_relations(type_data, attack, defenders)
     assert result == expected
+
+
+@pytest.mark.parametrize('multiplier, expected', MULTIPLIER_CASES)
+def test_stringify_multiplier(multiplier, expected):
+    """Test that stringify_multiplier function works as expected."""
+    from poke_damage import stringify_multiplier
+    assert stringify_multiplier(multiplier) == expected

@@ -176,22 +176,28 @@ the api replaces a space with a hypen (-)
 """
 
 import requests
+from operator import mul
+from functools import reduce
 
 DDT = 'double_damage_to'
 HDT = 'half_damage_to'
+NDT = 'no_damage_to'
 
 DAMAGES = {
     DDT: 2,
     HDT: 0.5,
+    NDT: 0,
 }
 API_TYPE_URL = 'http://pokeapi.co/api/v2/type'
 
 
-def calculate(attack_string):
+def main(attack_string):
     """Calculate damage multiplyer."""
     attack_type, defenders = parse_input(attack_string)
     type_data = get_type_data(attack_type)
-    damage = parse_damage_relations(type_data, attack_type, defenders)
+    multipliers = parse_damage_relations(type_data, attack_type, defenders)
+    multiplier = total_multiplier(multipliers)
+    return stringify_multiplier(multiplier)
 
 
 def parse_input(attack_string):
@@ -229,3 +235,13 @@ def parse_damage_relations(type_data, attack, defenders):
                 output[damage_type['name']] = multiplier
 
     return output
+
+
+def total_multiplier(damage):
+    """Multiply all integer damage multipliers found in values."""
+    return reduce(mul, damage.values())
+
+
+def stringify_multiplier(multiplier):
+    """Format integer multiplier into string."""
+    return str(multiplier) + 'x'
