@@ -159,7 +159,9 @@ returns (skipped the long list)
     ]
     }
 
-If you parse this json, you can calculate the output, instead of hard coding it.
+If you parse this json, you can calculate the output, instead of hard coding
+it.
+
 Bonus 2
 
 Deep further into the api and give the multiplier for folowing
@@ -173,10 +175,57 @@ side note
 the api replaces a space with a hypen (-)
 """
 
+import requests
 
-def parse_input(args):
-    """Parse input."""
+DDT = 'double_damage_to'
+HDT = 'half_damage_to'
+
+DAMAGES = {
+    DDT: 2,
+    HDT: 0.5,
+}
+API_TYPE_URL = 'http://pokeapi.co/api/v2/type'
 
 
-def calculate(attack):
+def calculate(attack_string):
     """Calculate damage multiplyer."""
+    attack_type, defenders = parse_input(attack_string)
+    type_data = get_type_data(attack_type)
+    damage = parse_damage_relations(type_data, attack_type, defenders)
+
+
+def parse_input(attack_string):
+    """Parse input."""
+    try:
+        attack, defenders = attack_string.split(' -> ')
+    except TypeError:
+        raise ValueError(
+            'Correct format: '
+            '"attack1 [attack2 ...] -> defend1 [defend2 ...]"'
+        )
+    defenders = set(defenders.split())
+    return attack, defenders
+
+
+def get_type_data(attack_type):
+    """Get JSON data about a given Pokemon attack type."""
+    url = '/'.join((API_TYPE_URL, attack_type))
+    response = requests.get(url)
+    if response.status_code != 200:
+        raise ValueError('Invalid Pokemon attack type.')
+    return response.json()
+
+
+def parse_damage_relations(type_data, attack, defenders):
+    """Reduce and simplify type_data on damage relations."""
+    output = dict.fromkeys(defenders, 1)
+    damage_relations = type_data['damage_relations']
+
+    for damage_rel, multiplier in DAMAGES.items():
+        damage_types = damage_relations[damage_rel]
+
+        for damage_type in damage_types:
+            if damage_type['name'] in defenders:
+                output[damage_type['name']] = multiplier
+
+    return output
