@@ -1,7 +1,6 @@
 """Tests for correct damage output from comparing Pokemon types."""
 
 import pytest
-from poke_damage import DDT, HDT
 
 
 OUTPUT_CASES = [
@@ -26,11 +25,11 @@ MULTIPLIER_CASES = [
 ]
 
 
-@pytest.mark.parametrize('attack, multiplyer', OUTPUT_CASES)
-def test_output(attack, multiplyer):
-    """Test that input with attacking and target returns correct multiplyer."""
+@pytest.mark.parametrize('attack, multiplier', OUTPUT_CASES)
+def test_output(attack, multiplier):
+    """Test that input with attacking and target returns correct multiplier."""
     from poke_damage import main
-    assert main(attack) == multiplyer
+    assert main(attack) == multiplier
 
 
 @pytest.mark.parametrize('attack, defenders, expected', DAMAGE_RELATION_CASES)

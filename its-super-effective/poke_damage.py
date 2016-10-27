@@ -179,20 +179,17 @@ import requests
 from operator import mul
 from functools import reduce
 
-DDT = 'double_damage_to'
-HDT = 'half_damage_to'
-NDT = 'no_damage_to'
 
 DAMAGES = {
-    DDT: 2,
-    HDT: 0.5,
-    NDT: 0,
+    'double_damage_to': 2,
+    'half_damage_to': 0.5,
+    'no_damage_to': 0,
 }
 API_TYPE_URL = 'http://pokeapi.co/api/v2/type'
 
 
 def main(attack_string):
-    """Calculate damage multiplyer."""
+    """Calculate damage multiplier."""
     attack_type, defenders = parse_input(attack_string)
     type_data = get_type_data(attack_type)
     multipliers = parse_damage_relations(type_data, attack_type, defenders)
