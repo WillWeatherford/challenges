@@ -6,7 +6,7 @@ from boggle import solve_boggle_board
 
 CASES = [
     (
-        [[]], set()
+        [], set()
     ),
     (
         [['a']], set()

@@ -17,15 +17,12 @@ def solve_boggle_board(board):
     """Return a set of all allowed English words found in the given board."""
     found_words = set()
     for y, x, char in iter_board(board):
-        visited = set()
-        found_words.update(find_words(y, x, char, visited, board, ALL_WORDS))
+        found_words.update(find_words(y, x, char, set(), board, ALL_WORDS))
     return found_words
 
 
 def find_words(y, x, chars, visited, board, all_words):
     """Return words found recursively from the starting position."""
-    # Base case: if chars isn't in dictionary, return nothing
-    # Make more efficient by accessing Trie node directly
     found_words = set()
     if not all_words.contains_prefix(chars):
         return found_words
@@ -49,7 +46,7 @@ def find_words(y, x, chars, visited, board, all_words):
 
 def iter_board(board):
     """Return generator of all coords in board and char at that coord."""
-    size = len(board[0])
+    size = len(board)
     for y, x in product(range(size), range(size)):
         yield y, x, board[y][x]
 
