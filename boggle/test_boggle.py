@@ -2,6 +2,7 @@
 
 from __future__ import unicode_literals, division
 import pytest
+from boggle import solve_boggle_board
 
 CASES = [
     (
@@ -20,11 +21,16 @@ CASES = [
          ['x', 'e']],
         {'axe'}
     ),
+    (
+        [['x', 'x', 'x'],
+         ['x', 'x', 'x'],
+         ['x', 'x', 'x']],
+        set()
+    ),
 ]
 
 
 @pytest.mark.parametrize('board, words', CASES)
 def test_solve_boggle_board(board, words):
     """Test that the correct set of words is returned for a given board."""
-    from boggle import solve_boggle_board
     assert solve_boggle_board(board) == words
