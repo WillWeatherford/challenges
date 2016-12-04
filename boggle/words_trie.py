@@ -48,7 +48,7 @@ class Trie(object):
             current_dict = current_dict.setdefault(char, {})
 
     def contains(self, word):
-        """Return if word is in Trie."""
+        """Return boolean if word is in the Trie."""
         current_dict = self._dict
         for char in word:
             try:
@@ -57,6 +57,15 @@ class Trie(object):
                 return False
         return '$' in current_dict
 
+    def contains_prefix(self, word):
+        """Return if word or stub/prefix of a word is in the Trie."""
+        current_dict = self._dict
+        for char in word:
+            try:
+                current_dict = current_dict[char]
+            except KeyError:
+                return False
+        return True
 
 if __name__ == '__main__':
     trie = Trie()
