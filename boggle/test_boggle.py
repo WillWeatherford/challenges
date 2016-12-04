@@ -32,6 +32,15 @@ CASES = [
          ['-', '-', 's'],
          ['-', '-', '-']],
         {'cat', 'cats', 'cast', 'sat', 'sac'}
+    ),
+    (
+        [['-', 'l', '-', '-'],
+         ['-', 'a', 't', '-'],
+         ['-', 's', 'e', '-'],
+         ['-', '-', '-', '-']],
+        {'steal', 'teal', 'late', 'ate', 'tea', 'teas', 'last', 'east', 'eat',
+         'seat', 'sate', 'seal', 'sat', 'salt', 'lats', 'eta', 'sea', 'eats',
+         'set'}
     )
 ]
 
