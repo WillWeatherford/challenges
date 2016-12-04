@@ -1,6 +1,6 @@
 """Algorithm to solve a square boggle board of any size.
 
-Provides access to the entire dictionary of allowed English words in a Trie
+Access to the entire dictionary of allowed English words is provided by a Trie
 data structure.
 
 """
@@ -17,7 +17,8 @@ def solve_boggle_board(board):
     """Return a set of all allowed English words found in the given board."""
     found_words = set()
     for y, x, char in iter_board(board):
-        found_words.update(find_words(y, x, char, set(), board, ALL_WORDS))
+        words = find_words(y, x, char, set(), board, ALL_WORDS)
+        found_words.update(words)
     return found_words
 
 
@@ -37,6 +38,8 @@ def find_words(y, x, chars, visited, board, all_words):
             continue
 
         n_chars = chars + n_char
+        # Necessary to create multiple copies of the visited set, since
+        # different recursive branches will traverse grid in different order
         n_visited = visited.copy()
         n_words = find_words(n_y, n_x, n_chars, n_visited, board, all_words)
         found_words.update(n_words)
