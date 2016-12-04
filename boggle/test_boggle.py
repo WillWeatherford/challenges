@@ -13,7 +13,7 @@ CASES = [
     (
         [['o', 'n'],
          ['t', 'a']],
-        {'on', 'no', 'to', 'an', 'at'}
+        {'ton', 'tan', 'ant', 'oat', 'not'}
     ),
 ]
 
