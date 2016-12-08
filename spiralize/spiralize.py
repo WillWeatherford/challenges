@@ -1,12 +1,12 @@
 """Code challenge: create a square array with a spiral from the given size."""
 from itertools import cycle, chain
 
-DIRECTIONS = [
+DIRECTIONS = (
     lambda y, x: (y, x + 1),
     lambda y, x: (y + 1, x),
     lambda y, x: (y, x - 1),
     lambda y, x: (y - 1, x),
-]
+)
 
 
 def spiralize(size):
