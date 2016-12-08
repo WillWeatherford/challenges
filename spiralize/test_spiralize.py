@@ -45,8 +45,8 @@ def test_gen_sequence(size, sequence):
     assert list(generate_sequence(size)) == sequence
 
 
-# @pytest.mark.parametrize('size, result', CASES)
-# def test_spiralize(size, result):
-#     """Test that spiral of given size is created correctly."""
-#     from spiralize import spiralize
-#     assert spiralize(size) == result
+@pytest.mark.parametrize('size, result', CASES)
+def test_spiralize(size, result):
+    """Test that spiral of given size is created correctly."""
+    from spiralize import spiralize
+    assert spiralize(size) == result

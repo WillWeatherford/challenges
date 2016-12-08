@@ -12,12 +12,12 @@ DIRECTIONS = [
 def spiralize(size):
     """Return list of lists -- 2D grid -- with a spiral of 1s starting in topleft."""
     grid = initialize_grid(size)
-    seq = chain((size, size - 1), generate_sequence(size))
-    seq = zip(cycle(DIRECTIONS), seq)
+    sequence = chain((size, size - 1), generate_sequence(size))
+    moves = zip(cycle(DIRECTIONS), sequence)
     y, x = 0, -1
-    for direction, num_moves in seq:
+    for direction, num_moves in moves:
         y, x = move_and_write(num_moves, direction, y, x, grid)
-
+    return grid
 
 
 def initialize_grid(size):
@@ -26,7 +26,11 @@ def initialize_grid(size):
 
 
 def move_and_write(num_moves, direction, y, x, grid):
-    """Move the given number of moves/direction starting from y, x, setting coords to 1."""
+    """Move given number of moves/direction, setting values on grid to 1."""
+    for _ in range(num_moves):
+        y, x = direction(y, x)
+        grid[y][x] = 1
+    return y, x
 
 
 def generate_sequence(size):
